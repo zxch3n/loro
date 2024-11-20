@@ -1487,6 +1487,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "loro-wasm-essential"
+version = "0.1.0"
+dependencies = [
+ "console_error_panic_hook",
+ "getrandom",
+ "js-sys",
+ "loro-internal 1.1.0",
+ "loro-rle 1.1.0",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "tracing",
+ "tracing-wasm",
+ "wasm-bindgen",
+ "wasm-bindgen-derive",
+]
+
+[[package]]
 name = "loro_fractional_index"
 version = "0.16.2"
 source = "git+https://github.com/loro-dev/loro.git?tag=loro-crdt@0.16.7#d2b0520f8633f96146a49ec205bd5e7056880f1a"
