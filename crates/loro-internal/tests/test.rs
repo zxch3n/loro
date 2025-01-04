@@ -1333,3 +1333,51 @@ fn test_get_greatest_timestamp() {
     // Even with a later change having lower timestamp, should still return highest
     assert_eq!(oplog.get_greatest_timestamp(&v3), 200);
 }
+
+#[test]
+fn test_is_empty() -> LoroResult<()> {
+    let doc = LoroDoc::new();
+    doc.start_auto_commit();
+
+    // Test LoroList
+    let list = doc.get_list("list");
+    assert!(list.is_empty());
+    list.insert(0, 1)?;
+    assert!(!list.is_empty());
+    list.delete(0, 1)?;
+    assert!(list.is_empty());
+
+    // Test LoroMap
+    let map = doc.get_map("map");
+    assert!(map.is_empty());
+    map.insert("key", "value")?;
+    assert!(!map.is_empty());
+    map.delete("key")?;
+    assert!(map.is_empty());
+
+    // Test LoroText
+    let text = doc.get_text("text");
+    assert!(text.is_empty());
+    text.insert(0, "Hello")?;
+    assert!(!text.is_empty());
+    text.delete(0, 5)?;
+    assert!(text.is_empty());
+
+    // Test LoroTree
+    let tree = doc.get_tree("tree");
+    assert!(tree.is_empty());
+    let root = tree.create(TreeParentId::Root)?;
+    assert!(!tree.is_empty());
+    tree.delete(root)?;
+    assert!(tree.is_empty());
+
+    // Test LoroMovableList
+    let movable_list = doc.get_movable_list("movable_list");
+    assert!(movable_list.is_empty());
+    movable_list.insert(0, 1)?;
+    assert!(!movable_list.is_empty());
+    movable_list.delete(0, 1)?;
+    assert!(movable_list.is_empty());
+
+    Ok(())
+}
