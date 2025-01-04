@@ -8,7 +8,7 @@ use loro_internal::{
     event::{Diff, EventTriggerKind},
     fx_map,
     handler::{Handler, TextDelta, ValueOrHandler},
-    loro::ExportMode,
+    loro::{CommitOptions, ExportMode},
     version::{Frontiers, VersionRange},
     ApplyDiff, HandlerTrait, ListHandler, LoroDoc, MapHandler, TextHandler, ToJson, TreeHandler,
     TreeParentId,
@@ -1298,4 +1298,38 @@ fn import_status() -> LoroResult<()> {
     );
 
     Ok(())
+}
+
+#[test]
+fn test_get_greatest_timestamp() {
+    let doc = LoroDoc::new_auto_commit();
+    doc.set_peer_id(1).unwrap();
+    doc.set_record_timestamp(true);
+    doc.set_change_merge_interval(0);
+
+    // First change with timestamp 100
+    doc.get_text("text").insert(0, "1").unwrap();
+    doc.commit_with(CommitOptions::new().timestamp(100));
+    let v1 = doc.oplog_frontiers();
+
+    // Second change with timestamp 200
+    doc.get_text("text").insert(1, "2").unwrap();
+    doc.commit_with(CommitOptions::new().timestamp(200));
+    let v2 = doc.oplog_frontiers();
+
+    // Third change with timestamp 150
+    doc.get_text("text").insert(2, "3").unwrap();
+    doc.commit_with(CommitOptions::new().timestamp(150));
+    let v3 = doc.oplog_frontiers();
+
+    // Test with different frontiers
+    let oplog = doc.oplog().lock().unwrap();
+    // Single frontier should return its timestamp
+    assert_eq!(oplog.get_greatest_timestamp(&v1), 100);
+
+    // Should return highest timestamp from all changes in frontiers
+    assert_eq!(oplog.get_greatest_timestamp(&v2), 200);
+
+    // Even with a later change having lower timestamp, should still return highest
+    assert_eq!(oplog.get_greatest_timestamp(&v3), 200);
 }
