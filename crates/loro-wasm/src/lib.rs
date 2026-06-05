@@ -3061,19 +3061,10 @@ impl Default for LoroText {
 /// map, key, and container type, they get the same child container id and their
 /// subsequent edits merge in that child.
 ///
-/// Loro stores the activation value in the parent map slot as a compact binary
-/// mergeable-child ref, not as a reserved string. This avoids reserving
-/// user-visible strings such as `"🤝:Map"`: applications often let users edit
-/// titles, custom properties, metadata, or imported JSON fields directly, and a
-/// user-created string should not accidentally become an internal container
-/// edge. The binary ref includes a small digest of `(parent_id, key, kind)`, so
-/// copied or malformed binary values do not activate a mergeable child in the
-/// wrong map slot.
-///
-/// The ref is not an anti-forgery mechanism. It is a compact marker that makes
-/// accidental or UI-level construction of an internal mergeable edge negligible
-/// while keeping the map slot small. Existing non-mergeable values at the key
-/// are rejected and left untouched by `getMergeable*`.
+/// Loro activates a mergeable child by writing a specially constructed binary
+/// marker value into the parent map slot. String values do not activate
+/// mergeable children. If the key already holds a non-mergeable value,
+/// `getMergeable*` returns an error and leaves the value unchanged.
 ///
 /// Deleting the map key clears the ref and hides the mergeable child, but the
 /// child's state is preserved. Calling the same `getMergeable*` method again
@@ -3301,11 +3292,8 @@ impl LoroMap {
 
     /// Get or create a mergeable Counter under the given key.
     ///
-    /// See the `LoroMap` class documentation, section "Mergeable child containers",
-    /// for the storage format and conflict semantics.
-    ///
-    /// Throws if the key already holds a non-mergeable value (a plain scalar or a regular child
-    /// container); the existing value is left untouched.
+    /// If the key already holds a non-mergeable value, this throws and leaves
+    /// the value unchanged.
     ///
     /// @example
     /// ```ts
@@ -3322,8 +3310,9 @@ impl LoroMap {
     }
 
     /// Get or create a mergeable Map under the given key.
-    /// See the `LoroMap` class documentation, section "Mergeable child containers",
-    /// for the storage format and conflict semantics.
+    ///
+    /// If the key already holds a non-mergeable value, this throws and leaves
+    /// the value unchanged.
     #[wasm_bindgen(js_name = "getMergeableMap")]
     pub fn get_mergeable_map(&self, key: &str) -> JsResult<LoroMap> {
         let handler = self.handler.get_mergeable_map(key)?;
@@ -3331,8 +3320,9 @@ impl LoroMap {
     }
 
     /// Get or create a mergeable List under the given key.
-    /// See the `LoroMap` class documentation, section "Mergeable child containers",
-    /// for the storage format and conflict semantics.
+    ///
+    /// If the key already holds a non-mergeable value, this throws and leaves
+    /// the value unchanged.
     #[wasm_bindgen(js_name = "getMergeableList")]
     pub fn get_mergeable_list(&self, key: &str) -> JsResult<LoroList> {
         let handler = self.handler.get_mergeable_list(key)?;
@@ -3340,8 +3330,9 @@ impl LoroMap {
     }
 
     /// Get or create a mergeable MovableList under the given key.
-    /// See the `LoroMap` class documentation, section "Mergeable child containers",
-    /// for the storage format and conflict semantics.
+    ///
+    /// If the key already holds a non-mergeable value, this throws and leaves
+    /// the value unchanged.
     #[wasm_bindgen(js_name = "getMergeableMovableList")]
     pub fn get_mergeable_movable_list(&self, key: &str) -> JsResult<LoroMovableList> {
         let handler = self.handler.get_mergeable_movable_list(key)?;
@@ -3349,8 +3340,9 @@ impl LoroMap {
     }
 
     /// Get or create a mergeable Text under the given key.
-    /// See the `LoroMap` class documentation, section "Mergeable child containers",
-    /// for the storage format and conflict semantics.
+    ///
+    /// If the key already holds a non-mergeable value, this throws and leaves
+    /// the value unchanged.
     #[wasm_bindgen(js_name = "getMergeableText")]
     pub fn get_mergeable_text(&self, key: &str) -> JsResult<LoroText> {
         let handler = self.handler.get_mergeable_text(key)?;
@@ -3358,8 +3350,9 @@ impl LoroMap {
     }
 
     /// Get or create a mergeable Tree under the given key.
-    /// See the `LoroMap` class documentation, section "Mergeable child containers",
-    /// for the storage format and conflict semantics.
+    ///
+    /// If the key already holds a non-mergeable value, this throws and leaves
+    /// the value unchanged.
     #[wasm_bindgen(js_name = "getMergeableTree")]
     pub fn get_mergeable_tree(&self, key: &str) -> JsResult<LoroTree> {
         let handler = self.handler.get_mergeable_tree(key)?;
@@ -6972,16 +6965,10 @@ interface LoroMovableList<T = unknown> {
  * and container type, they get the same child container id and their subsequent
  * edits merge in that child.
  *
- * Loro stores the activation value in the parent map slot as a compact binary
- * mergeable-child ref, not as a reserved string. This avoids reserving
- * user-visible strings such as `"🤝:Map"`: users may edit titles, custom
- * properties, metadata, or imported JSON fields directly, and a user-created
- * string should not accidentally become an internal container edge.
- *
- * The binary ref includes a small digest of `(parent_id, key, kind)`. It is not
- * an anti-forgery mechanism; it makes accidental or UI-level construction of an
- * internal mergeable edge negligible and makes copied or malformed binary values
- * fail closed unless they are in the exact map slot they were created for.
+ * Loro activates a mergeable child by writing a specially constructed binary
+ * marker value into the parent map slot. String values do not activate
+ * mergeable children. If the key already holds a non-mergeable value,
+ * `getMergeable*` returns an error and leaves the value unchanged.
  *
  * Deleting the map key clears the ref and hides the mergeable child, but the
  * child's state is preserved. Calling the same `getMergeable*` method again
@@ -7024,55 +7011,43 @@ interface LoroMap<T extends Record<string, unknown> = Record<string, unknown>> {
     /**
      * Get or create a mergeable Counter under the given key.
      *
-     * See the `LoroMap` documentation, section "Mergeable child containers",
-     * for the storage format and conflict semantics.
-     *
-     * Throws if the key already holds a non-mergeable value; the existing value is left untouched.
+     * If the key already holds a non-mergeable value, this throws and leaves
+     * the value unchanged.
      */
     getMergeableCounter(key: string): LoroCounter;
     /**
      * Get or create a mergeable Map under the given key.
      *
-     * See the `LoroMap` documentation, section "Mergeable child containers",
-     * for the storage format and conflict semantics.
-     *
-     * Throws if the key already holds a non-mergeable value; the existing value is left untouched.
+     * If the key already holds a non-mergeable value, this throws and leaves
+     * the value unchanged.
      */
     getMergeableMap(key: string): LoroMap;
     /**
      * Get or create a mergeable List under the given key.
      *
-     * See the `LoroMap` documentation, section "Mergeable child containers",
-     * for the storage format and conflict semantics.
-     *
-     * Throws if the key already holds a non-mergeable value; the existing value is left untouched.
+     * If the key already holds a non-mergeable value, this throws and leaves
+     * the value unchanged.
      */
     getMergeableList(key: string): LoroList;
     /**
      * Get or create a mergeable MovableList under the given key.
      *
-     * See the `LoroMap` documentation, section "Mergeable child containers",
-     * for the storage format and conflict semantics.
-     *
-     * Throws if the key already holds a non-mergeable value; the existing value is left untouched.
+     * If the key already holds a non-mergeable value, this throws and leaves
+     * the value unchanged.
      */
     getMergeableMovableList(key: string): LoroMovableList;
     /**
      * Get or create a mergeable Text under the given key.
      *
-     * See the `LoroMap` documentation, section "Mergeable child containers",
-     * for the storage format and conflict semantics.
-     *
-     * Throws if the key already holds a non-mergeable value; the existing value is left untouched.
+     * If the key already holds a non-mergeable value, this throws and leaves
+     * the value unchanged.
      */
     getMergeableText(key: string): LoroText;
     /**
      * Get or create a mergeable Tree under the given key.
      *
-     * See the `LoroMap` documentation, section "Mergeable child containers",
-     * for the storage format and conflict semantics.
-     *
-     * Throws if the key already holds a non-mergeable value; the existing value is left untouched.
+     * If the key already holds a non-mergeable value, this throws and leaves
+     * the value unchanged.
      */
     getMergeableTree(key: string): LoroTree;
     /**

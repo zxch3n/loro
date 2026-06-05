@@ -1993,20 +1993,10 @@ impl Default for LoroList {
 /// `(parent map, key, container type)`, they get the same child container id and
 /// their subsequent edits merge in that child.
 ///
-/// Internally, the parent map slot stores a compact binary mergeable-child ref,
-/// not a reserved user string. This is deliberate: applications often let end
-/// users edit titles, custom properties, metadata, or imported JSON fields
-/// directly. If mergeable children were activated by a string such as
-/// `"🤝:Map"`, normal user data could collide with Loro's internal structure and
-/// accidentally create a container edge. The binary ref lives outside the normal
-/// string value space and includes a small digest of `(parent_id, key, kind)`,
-/// so copied or malformed binary values fail closed unless they are in the
-/// exact map slot they were created for.
-///
-/// The binary ref is not an anti-forgery mechanism. It is a compact marker that
-/// makes accidental or UI-level construction of an internal mergeable edge
-/// negligible while keeping the map slot small. Existing non-mergeable values
-/// at the key are rejected and left untouched by `get_mergeable_*`.
+/// Internally, activation writes a specially constructed `LoroValue::Binary`
+/// marker into the parent map slot. String values do not activate mergeable
+/// children. If the key already holds a non-mergeable value, `get_mergeable_*`
+/// returns an error and leaves the value unchanged.
 ///
 /// Deleting the map key clears the ref and hides the mergeable child, but the
 /// child's state remains addressable by its deterministic id. Calling the same

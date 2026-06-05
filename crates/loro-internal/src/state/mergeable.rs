@@ -5,7 +5,7 @@
 //! the parent map's compact binary child ref is the single source of truth for whether that child
 //! is currently active.
 //!
-//! The ref is intentionally stored as binary user data rather than a reserved string. This keeps
+//! The ref is intentionally stored as a specially constructed binary marker value. This keeps
 //! user-editable strings from being reinterpreted as internal container topology, and lets the
 //! resolver fail closed unless the ref's digest matches the exact `(parent, key, kind)` being
 //! resolved.
