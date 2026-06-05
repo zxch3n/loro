@@ -3056,7 +3056,7 @@ impl Default for LoroText {
 ///
 /// ## Mergeable child containers
 ///
-/// `getMergeable*` methods create deterministic child containers under a map
+/// `ensureMergeable*` methods create deterministic child containers under a map
 /// key. If two peers independently call the same method with the same parent
 /// map, key, and container type, they get the same child container id and their
 /// subsequent edits merge in that child.
@@ -3064,10 +3064,10 @@ impl Default for LoroText {
 /// Loro activates a mergeable child by writing a specially constructed binary
 /// marker value into the parent map slot. String values do not activate
 /// mergeable children. If the key already holds a non-mergeable value,
-/// `getMergeable*` returns an error and leaves the value unchanged.
+/// `ensureMergeable*` returns an error and leaves the value unchanged.
 ///
 /// Deleting the map key clears the ref and hides the mergeable child, but the
-/// child's state is preserved. Calling the same `getMergeable*` method again
+/// child's state is preserved. Calling the same `ensureMergeable*` method again
 /// writes the ref back and resurfaces the preserved state.
 #[derive(Clone)]
 #[wasm_bindgen]
@@ -3290,7 +3290,7 @@ impl LoroMap {
         Ok(handler_to_js_value(c, false).into())
     }
 
-    /// Get or create a mergeable Counter under the given key.
+    /// Ensure a mergeable Counter exists under the given key and return it.
     ///
     /// If the key already holds a non-mergeable value, this throws and leaves
     /// the value unchanged.
@@ -3300,62 +3300,62 @@ impl LoroMap {
     /// import { LoroDoc } from "loro-crdt";
     ///
     /// const doc = new LoroDoc();
-    /// const counter = doc.getMap("state").getMergeableCounter("revision");
+    /// const counter = doc.getMap("state").ensureMergeableCounter("revision");
     /// counter.increment(1);
     /// ```
-    #[wasm_bindgen(js_name = "getMergeableCounter")]
-    pub fn get_mergeable_counter(&self, key: &str) -> JsResult<LoroCounter> {
-        let handler = self.handler.get_mergeable_counter(key)?;
+    #[wasm_bindgen(js_name = "ensureMergeableCounter")]
+    pub fn ensure_mergeable_counter(&self, key: &str) -> JsResult<LoroCounter> {
+        let handler = self.handler.ensure_mergeable_counter(key)?;
         Ok(LoroCounter { handler })
     }
 
-    /// Get or create a mergeable Map under the given key.
+    /// Ensure a mergeable Map exists under the given key and return it.
     ///
     /// If the key already holds a non-mergeable value, this throws and leaves
     /// the value unchanged.
-    #[wasm_bindgen(js_name = "getMergeableMap")]
-    pub fn get_mergeable_map(&self, key: &str) -> JsResult<LoroMap> {
-        let handler = self.handler.get_mergeable_map(key)?;
+    #[wasm_bindgen(js_name = "ensureMergeableMap")]
+    pub fn ensure_mergeable_map(&self, key: &str) -> JsResult<LoroMap> {
+        let handler = self.handler.ensure_mergeable_map(key)?;
         Ok(LoroMap { handler })
     }
 
-    /// Get or create a mergeable List under the given key.
+    /// Ensure a mergeable List exists under the given key and return it.
     ///
     /// If the key already holds a non-mergeable value, this throws and leaves
     /// the value unchanged.
-    #[wasm_bindgen(js_name = "getMergeableList")]
-    pub fn get_mergeable_list(&self, key: &str) -> JsResult<LoroList> {
-        let handler = self.handler.get_mergeable_list(key)?;
+    #[wasm_bindgen(js_name = "ensureMergeableList")]
+    pub fn ensure_mergeable_list(&self, key: &str) -> JsResult<LoroList> {
+        let handler = self.handler.ensure_mergeable_list(key)?;
         Ok(LoroList { handler })
     }
 
-    /// Get or create a mergeable MovableList under the given key.
+    /// Ensure a mergeable MovableList exists under the given key and return it.
     ///
     /// If the key already holds a non-mergeable value, this throws and leaves
     /// the value unchanged.
-    #[wasm_bindgen(js_name = "getMergeableMovableList")]
-    pub fn get_mergeable_movable_list(&self, key: &str) -> JsResult<LoroMovableList> {
-        let handler = self.handler.get_mergeable_movable_list(key)?;
+    #[wasm_bindgen(js_name = "ensureMergeableMovableList")]
+    pub fn ensure_mergeable_movable_list(&self, key: &str) -> JsResult<LoroMovableList> {
+        let handler = self.handler.ensure_mergeable_movable_list(key)?;
         Ok(LoroMovableList { handler })
     }
 
-    /// Get or create a mergeable Text under the given key.
+    /// Ensure a mergeable Text exists under the given key and return it.
     ///
     /// If the key already holds a non-mergeable value, this throws and leaves
     /// the value unchanged.
-    #[wasm_bindgen(js_name = "getMergeableText")]
-    pub fn get_mergeable_text(&self, key: &str) -> JsResult<LoroText> {
-        let handler = self.handler.get_mergeable_text(key)?;
+    #[wasm_bindgen(js_name = "ensureMergeableText")]
+    pub fn ensure_mergeable_text(&self, key: &str) -> JsResult<LoroText> {
+        let handler = self.handler.ensure_mergeable_text(key)?;
         Ok(LoroText { handler })
     }
 
-    /// Get or create a mergeable Tree under the given key.
+    /// Ensure a mergeable Tree exists under the given key and return it.
     ///
     /// If the key already holds a non-mergeable value, this throws and leaves
     /// the value unchanged.
-    #[wasm_bindgen(js_name = "getMergeableTree")]
-    pub fn get_mergeable_tree(&self, key: &str) -> JsResult<LoroTree> {
-        let handler = self.handler.get_mergeable_tree(key)?;
+    #[wasm_bindgen(js_name = "ensureMergeableTree")]
+    pub fn ensure_mergeable_tree(&self, key: &str) -> JsResult<LoroTree> {
+        let handler = self.handler.ensure_mergeable_tree(key)?;
         Ok(LoroTree { handler })
     }
 
@@ -6960,7 +6960,7 @@ interface LoroMovableList<T = unknown> {
  *
  * ## Mergeable child containers
  *
- * `getMergeable*` methods create deterministic child containers under a map key.
+ * `ensureMergeable*` methods create deterministic child containers under a map key.
  * If two peers independently call the same method with the same parent map, key,
  * and container type, they get the same child container id and their subsequent
  * edits merge in that child.
@@ -6968,10 +6968,10 @@ interface LoroMovableList<T = unknown> {
  * Loro activates a mergeable child by writing a specially constructed binary
  * marker value into the parent map slot. String values do not activate
  * mergeable children. If the key already holds a non-mergeable value,
- * `getMergeable*` returns an error and leaves the value unchanged.
+ * `ensureMergeable*` returns an error and leaves the value unchanged.
  *
  * Deleting the map key clears the ref and hides the mergeable child, but the
- * child's state is preserved. Calling the same `getMergeable*` method again
+ * child's state is preserved. Calling the same `ensureMergeable*` method again
  * writes the ref back and resurfaces the preserved state.
  */
 interface LoroMap<T extends Record<string, unknown> = Record<string, unknown>> {
@@ -7009,47 +7009,47 @@ interface LoroMap<T extends Record<string, unknown> = Record<string, unknown>> {
      */
     setContainer<C extends Container, Key extends keyof T>(key: Key, child: C): NonNullableType<T[Key]> extends C ? NonNullableType<T[Key]> : C;
     /**
-     * Get or create a mergeable Counter under the given key.
+     * Ensure a mergeable Counter exists under the given key and return it.
      *
      * If the key already holds a non-mergeable value, this throws and leaves
      * the value unchanged.
      */
-    getMergeableCounter(key: string): LoroCounter;
+    ensureMergeableCounter(key: string): LoroCounter;
     /**
-     * Get or create a mergeable Map under the given key.
+     * Ensure a mergeable Map exists under the given key and return it.
      *
      * If the key already holds a non-mergeable value, this throws and leaves
      * the value unchanged.
      */
-    getMergeableMap(key: string): LoroMap;
+    ensureMergeableMap(key: string): LoroMap;
     /**
-     * Get or create a mergeable List under the given key.
+     * Ensure a mergeable List exists under the given key and return it.
      *
      * If the key already holds a non-mergeable value, this throws and leaves
      * the value unchanged.
      */
-    getMergeableList(key: string): LoroList;
+    ensureMergeableList(key: string): LoroList;
     /**
-     * Get or create a mergeable MovableList under the given key.
+     * Ensure a mergeable MovableList exists under the given key and return it.
      *
      * If the key already holds a non-mergeable value, this throws and leaves
      * the value unchanged.
      */
-    getMergeableMovableList(key: string): LoroMovableList;
+    ensureMergeableMovableList(key: string): LoroMovableList;
     /**
-     * Get or create a mergeable Text under the given key.
+     * Ensure a mergeable Text exists under the given key and return it.
      *
      * If the key already holds a non-mergeable value, this throws and leaves
      * the value unchanged.
      */
-    getMergeableText(key: string): LoroText;
+    ensureMergeableText(key: string): LoroText;
     /**
-     * Get or create a mergeable Tree under the given key.
+     * Ensure a mergeable Tree exists under the given key and return it.
      *
      * If the key already holds a non-mergeable value, this throws and leaves
      * the value unchanged.
      */
-    getMergeableTree(key: string): LoroTree;
+    ensureMergeableTree(key: string): LoroTree;
     /**
      *  Get the value of the key. If the value is a child container, the corresponding
      *  `Container` will be returned.

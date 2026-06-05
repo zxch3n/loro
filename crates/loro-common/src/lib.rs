@@ -1,3 +1,5 @@
+#![allow(unused_assignments)]
+
 use std::{fmt::Display, io::Write};
 
 use arbitrary::Arbitrary;
